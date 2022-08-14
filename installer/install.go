@@ -1,8 +1,11 @@
 package installer
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 func (i *Installer) installPackage(pkg string) {
@@ -41,4 +44,11 @@ func cleanup(venv string) {
 	if err == nil {
 		fmt.Println(string(cmd))
 	}
+}
+
+func (i *Installer) isAlreadyInstalled(pkg string) bool {
+	if _, err := os.Stat(filepath.Join(i.diskTargetLocation, pkg+".zip")); errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+	return true
 }

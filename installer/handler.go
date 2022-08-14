@@ -32,15 +32,20 @@ func NewInstaller() *Installer {
 
 func (i *Installer) Handler() http.HandlerFunc {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		keys, ok := request.URL.Query()["install"]
+		pkgs, ok := request.URL.Query()["install"]
 		if !ok {
 			responseWriter(http.StatusBadRequest, "package name missing!", response)
 			return
 		}
 
-		go i.installPackage(keys[0])
+		if i.isAlreadyInstalled(pkgs[0]) {
+			responseWriter(http.StatusCreated, fmt.Sprintf("package %s already installed!", pkgs[0]), response)
+			return
+		}
 
-		responseWriter(http.StatusCreated, "install request created!", response)
+		go i.installPackage(pkgs[0])
+
+		responseWriter(http.StatusCreated, fmt.Sprintf("installing package: %s", pkgs[0]), response)
 	})
 }
 
