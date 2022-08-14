@@ -11,7 +11,7 @@ main() {
 
   info "installing $3 package in $2 directory in $1 venv"
   mkdir /tmp/$1/$2
-  pip install $3 -t /tmp/$1/$2
+  pip install $3 -t /tmp/$1/$2 || return 1
 
   info "deactivating venv $1"
   deactivate

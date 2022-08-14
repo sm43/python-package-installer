@@ -16,7 +16,7 @@ func (i *Installer) installPackage(pkg string) {
 	// create venv
 	cmd, err := exec.Command("/bin/sh", "installer/scripts/create.sh", venv).Output()
 	if err != nil {
-		fmt.Println("failed to create venv: ", err)
+		fmt.Println("failed to create venv: ", venv, err)
 		return
 	}
 	fmt.Println("create output: ", string(cmd))
@@ -25,7 +25,7 @@ func (i *Installer) installPackage(pkg string) {
 	targetDir := getTargetDir(pkg)
 	cmd, err = exec.Command("/bin/sh", "installer/scripts/install.sh", venv, targetDir, pkg).Output()
 	if err != nil {
-		fmt.Println("failed to install package: ", err)
+		fmt.Println("failed to install package: ", pkg, err)
 		return
 	}
 	fmt.Println("install output: ", string(cmd))
