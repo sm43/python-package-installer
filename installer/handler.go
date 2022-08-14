@@ -3,9 +3,11 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Installer struct {
@@ -32,20 +34,41 @@ func NewInstaller() *Installer {
 
 func (i *Installer) Handler() http.HandlerFunc {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		pkgs, ok := request.URL.Query()["install"]
-		if !ok {
-			responseWriter(http.StatusBadRequest, "package name missing!", response)
+		payload, err := ioutil.ReadAll(request.Body)
+		if err != nil {
+			fmt.Printf("failed to read body : %v", err)
+			response.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		if i.isAlreadyInstalled(pkgs[0]) {
-			responseWriter(http.StatusCreated, fmt.Sprintf("package %s already installed!", pkgs[0]), response)
+		var body map[string]interface{}
+		if string(payload) != "" {
+			if err := json.Unmarshal(payload, &body); err != nil {
+				fmt.Printf("Invalid event body format format: %s", err)
+				response.WriteHeader(http.StatusBadRequest)
+			}
+		}
+
+		if body["command"] == nil {
+			responseWriter(http.StatusBadRequest, "invalid request, missing pip command in body!", response)
 			return
 		}
 
-		go i.installPackage(pkgs[0])
+		command := strings.TrimSpace(fmt.Sprint(body["command"]))
+		pkgs := strings.Split(command, " ")
+		if !strings.HasPrefix(command, "pip install ") || len(pkgs) <= 2 {
+			responseWriter(http.StatusBadRequest, "invalid pip command", response)
+			return
+		}
 
-		responseWriter(http.StatusCreated, fmt.Sprintf("installing package: %s", pkgs[0]), response)
+		if i.isAlreadyInstalled(pkgs[2]) {
+			responseWriter(http.StatusCreated, fmt.Sprintf("package %s already installed!", pkgs[2]), response)
+			return
+		}
+
+		go i.installPackage(pkgs[2])
+
+		responseWriter(http.StatusCreated, fmt.Sprintf("installing package: %s", pkgs[2]), response)
 	})
 }
 

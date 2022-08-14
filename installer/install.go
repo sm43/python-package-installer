@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func (i *Installer) installPackage(pkg string) {
@@ -21,7 +22,7 @@ func (i *Installer) installPackage(pkg string) {
 	fmt.Println("create output: ", string(cmd))
 
 	// install package
-	targetDir := pkg
+	targetDir := getTargetDir(pkg)
 	cmd, err = exec.Command("/bin/sh", "installer/scripts/install.sh", venv, targetDir, pkg).Output()
 	if err != nil {
 		fmt.Println("failed to install package: ", err)
@@ -46,8 +47,17 @@ func cleanup(venv string) {
 	}
 }
 
+func getTargetDir(pkg string) string {
+	if !strings.Contains(pkg, "https://") {
+		return pkg
+	}
+	targetDir := strings.Split(pkg, "https://")[1]
+	return strings.ReplaceAll(targetDir, "/", "_")
+}
+
 func (i *Installer) isAlreadyInstalled(pkg string) bool {
-	if _, err := os.Stat(filepath.Join(i.diskTargetLocation, pkg+".zip")); errors.Is(err, os.ErrNotExist) {
+	targetDir := getTargetDir(pkg)
+	if _, err := os.Stat(filepath.Join(i.diskTargetLocation, targetDir+".zip")); errors.Is(err, os.ErrNotExist) {
 		return false
 	}
 	return true
