@@ -2,36 +2,15 @@ package installer
 
 import (
 	"fmt"
-	"net/http"
 	"os/exec"
 )
-
-type Installer struct {
-	diskTargetLocation string
-}
-
-func NewInstaller() *Installer {
-	return &Installer{
-		diskTargetLocation: "",
-	}
-}
-
-func (i *Installer) Handler() http.HandlerFunc {
-	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		// TODO: validate input
-
-		go i.installPackage("install")
-
-		fmt.Fprint(response, "request received!")
-	})
-}
 
 func (i *Installer) installPackage(pkg string) {
 	venv := getVenvName()
 	defer cleanup(venv)
 
 	// create venv
-	cmd, err := exec.Command("/bin/sh", "installer/create.sh", venv).Output()
+	cmd, err := exec.Command("/bin/sh", "installer/scripts/create.sh", venv).Output()
 	if err != nil {
 		fmt.Println("failed to create venv: ", err)
 		return
@@ -40,7 +19,7 @@ func (i *Installer) installPackage(pkg string) {
 
 	// install package
 	targetDir := pkg
-	cmd, err = exec.Command("/bin/sh", "installer/install.sh", venv, targetDir, pkg).Output()
+	cmd, err = exec.Command("/bin/sh", "installer/scripts/install.sh", venv, targetDir, pkg).Output()
 	if err != nil {
 		fmt.Println("failed to install package: ", err)
 		return
@@ -48,7 +27,8 @@ func (i *Installer) installPackage(pkg string) {
 	fmt.Println("install output: ", string(cmd))
 
 	// zip and copy package
-	cmd, err = exec.Command("/bin/sh", "installer/copy.sh", venv, targetDir, fmt.Sprint(pkg+".zip")).Output()
+	cmd, err = exec.Command("/bin/sh", "installer/scripts/copy.sh", venv, targetDir,
+		i.diskTargetLocation).Output()
 	if err != nil {
 		fmt.Println("failed to zip and copy package: ", err, string(cmd))
 		return
@@ -57,7 +37,7 @@ func (i *Installer) installPackage(pkg string) {
 }
 
 func cleanup(venv string) {
-	cmd, err := exec.Command("/bin/sh", "installer/cleanup.sh", venv).Output()
+	cmd, err := exec.Command("/bin/sh", "installer/scripts/cleanup.sh", venv).Output()
 	if err == nil {
 		fmt.Println(string(cmd))
 	}

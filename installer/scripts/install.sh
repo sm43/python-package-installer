@@ -3,7 +3,7 @@
 source $(dirname $0)/common.sh
 
 # $1 => venv directory
-# $2 => target directory
+# $2 => pkg directory
 # $3 => package name
 main() {
   info "activating venv $1"
