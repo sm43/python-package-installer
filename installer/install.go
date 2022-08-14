@@ -27,7 +27,7 @@ func (i *Installer) Handler() http.HandlerFunc {
 }
 
 func (i *Installer) installPackage(pkg string) {
-	venv := "venv"
+	venv := getVenvName()
 	defer cleanup(venv)
 
 	// create venv
