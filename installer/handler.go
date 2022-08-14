@@ -61,14 +61,19 @@ func (i *Installer) Handler() http.HandlerFunc {
 			return
 		}
 
-		if i.isAlreadyInstalled(pkgs[2]) {
-			responseWriter(http.StatusCreated, fmt.Sprintf("package %s already installed!", pkgs[2]), response)
-			return
+		for ctr := 2; ctr < len(pkgs); ctr++ {
+			if trimmed := strings.TrimSpace(pkgs[ctr]); len(trimmed) == 0 {
+				continue
+			}
+
+			if i.isAlreadyInstalled(pkgs[ctr]) {
+				responseWriter(http.StatusCreated, fmt.Sprintf("package %s already installed!", pkgs[ctr]), response)
+				return
+			}
+
+			go i.installPackage(pkgs[ctr])
 		}
-
-		go i.installPackage(pkgs[2])
-
-		responseWriter(http.StatusCreated, fmt.Sprintf("installing package: %s", pkgs[2]), response)
+		responseWriter(http.StatusCreated, fmt.Sprintf("installing package: %v", pkgs[2:]), response)
 	})
 }
 
