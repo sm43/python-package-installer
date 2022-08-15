@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 
@@ -9,13 +10,17 @@ import (
 )
 
 func main() {
-	log.Println("Starting Server...")
+	NWorkers := flag.Int("number-of-workers", 2, "The number of workers to start")
+	flag.Parse()
 
+	log.Println("Initializing Installer...")
 	installer := installer.NewInstaller()
 
-	workerqueue.StartDispatcher(installer, 2)
+	log.Println("Starting Dispatcher...")
+	workerqueue.StartDispatcher(installer, *NWorkers)
 
 	http.HandleFunc("/", installer.Handler())
 
+	log.Println("Starting Server...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

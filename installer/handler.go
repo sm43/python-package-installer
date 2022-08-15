@@ -73,6 +73,8 @@ func (i *Installer) Handler() http.HandlerFunc {
 				return
 			}
 
+			// TODO: search if the package is valid
+			// if not valid then return instead of moving to the queue
 			WorkQueue <- pkgs[ctr]
 		}
 		responseWriter(http.StatusCreated, fmt.Sprintf("installing package: %v", pkgs[2:]), response)

@@ -33,13 +33,13 @@ func (w *Worker) Start() {
 
 			select {
 			case work := <-w.Work:
-				fmt.Printf("worker %d: Received install request: %s", w.ID, work)
+				fmt.Printf("worker %d: processing request for: %s\n", w.ID, work)
 				if err := w.Installer.InstallPackage(work); err != nil {
 					// TODO: if installation failed due to non permanent error, then requeue
 					fmt.Printf("worker %d: failed to install package %s", w.ID, work)
 					continue
 				}
-				fmt.Printf("worker %d: installation completed for %s!\n", w.ID, work)
+				fmt.Printf("worker %d: processing completed for %s!\n", w.ID, work)
 
 			case <-w.QuitChan:
 				fmt.Printf("worker %d stopping\n", w.ID)
