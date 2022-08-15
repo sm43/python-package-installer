@@ -20,13 +20,15 @@ type response struct {
 	Message string `json:"message"`
 }
 
-func NewInstaller() *Installer {
-	targetLocation, _ := os.UserHomeDir()
-	if targetLocation != "" {
-		targetLocation = filepath.Join(targetLocation, "python-packages")
+func NewInstaller(targetLocation string) *Installer {
+	if targetLocation == "" {
+		targetLocation, _ = os.UserHomeDir()
+		if targetLocation != "" {
+			targetLocation = filepath.Join(targetLocation, "python-packages")
 
-		if err := os.MkdirAll(targetLocation, os.ModePerm); err != nil {
-			fmt.Println("failed to create target directory: ", err)
+			if err := os.MkdirAll(targetLocation, os.ModePerm); err != nil {
+				fmt.Println("failed to create target directory: ", err)
+			}
 		}
 	}
 	return &Installer{

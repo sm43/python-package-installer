@@ -6,6 +6,11 @@ The only supported command at this moment is `pip install <package names>`.
 The packages are installed in a venv and then zipped and copied to location `$HOME/python-packages`. The location can be 
 configurable.
 
+Prerequisites:
+* go 1.17 or more
+* python3 
+* pip
+
 To run the service on locally, clone the code and execute
 ```shell
   make run    
@@ -31,5 +36,3 @@ You can also pass a list of packages
 - The service use worker queues to handle the installation.
 - When a request is received, it is queued and as a worker is idle, the installation is given to that worker.
 - The number of workers by default are 2, which is also configurable by a flag.
-
-
