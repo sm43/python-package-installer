@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func (i *Installer) installPackage(pkg string) {
+func (i *Installer) InstallPackage(pkg string) error {
 	venv := getVenvName()
 	defer cleanup(venv)
 
@@ -17,7 +17,7 @@ func (i *Installer) installPackage(pkg string) {
 	cmd, err := exec.Command("/bin/sh", "installer/scripts/create.sh", venv).Output()
 	if err != nil {
 		fmt.Println("failed to create venv: ", venv, err)
-		return
+		return err
 	}
 	fmt.Println("create output: ", string(cmd))
 
@@ -26,7 +26,7 @@ func (i *Installer) installPackage(pkg string) {
 	cmd, err = exec.Command("/bin/sh", "installer/scripts/install.sh", venv, targetDir, pkg).Output()
 	if err != nil {
 		fmt.Println("failed to install package: ", pkg, err)
-		return
+		return err
 	}
 	fmt.Println("install output: ", string(cmd))
 
@@ -35,9 +35,11 @@ func (i *Installer) installPackage(pkg string) {
 		i.diskTargetLocation).Output()
 	if err != nil {
 		fmt.Println("failed to zip and copy package: ", err, string(cmd))
-		return
+		return err
 	}
 	fmt.Println("copy output: ", string(cmd))
+
+	return nil
 }
 
 func cleanup(venv string) {

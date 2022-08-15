@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+var WorkQueue = make(chan string, 100)
+
 type Installer struct {
 	diskTargetLocation string
 }
@@ -71,7 +73,7 @@ func (i *Installer) Handler() http.HandlerFunc {
 				return
 			}
 
-			go i.installPackage(pkgs[ctr])
+			WorkQueue <- pkgs[ctr]
 		}
 		responseWriter(http.StatusCreated, fmt.Sprintf("installing package: %v", pkgs[2:]), response)
 	})
