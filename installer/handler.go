@@ -36,6 +36,12 @@ func NewInstaller() *Installer {
 
 func (i *Installer) Handler() http.HandlerFunc {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
+		if request.Method != "POST" {
+			response.Header().Set("Allow", "POST")
+			response.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+
 		payload, err := ioutil.ReadAll(request.Body)
 		if err != nil {
 			fmt.Printf("failed to read body : %v", err)
